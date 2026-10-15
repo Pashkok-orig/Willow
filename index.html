@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneWishWillow — заказ подтверждён</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Chewy&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+  :root{
+    --cream:#EDE3CF; --paper:#FBF4E4; --red:#D2382C; --ink:#1C1713;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--cream);color:var(--ink);font-family:'Playfair Display',serif;overflow-x:hidden}
+  a{color:inherit}
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  .caps{font-weight:700;font-size:.72rem;letter-spacing:.26em;text-transform:uppercase}
+
+  /* ---------- шапка ---------- */
+  .topbar{background:var(--red);color:var(--paper);display:flex;align-items:center;
+    justify-content:space-between;gap:1rem;padding:12px clamp(14px,4vw,36px);flex-wrap:wrap}
+  .kicker{font-weight:800;font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;opacity:.95}
+  .logo-arc{width:min(300px,72vw);height:auto;display:block;margin-top:-4px}
+  .pill{background:var(--paper);color:var(--red);font-weight:900;font-size:clamp(.95rem,2.6vw,1.35rem);
+    letter-spacing:.1em;text-transform:uppercase;padding:.9em 1.6em;border-radius:10px;white-space:nowrap}
+
+  .wrap{max-width:780px;margin:0 auto;padding:0 20px;position:relative}
+
+  /* ---------- лента-wave ---------- */
+  .ribbon{width:min(560px,94%);height:auto;display:block;margin:0 auto}
+  .ribbon text{font-family:'Chewy',cursive;font-size:34px;fill:var(--paper);letter-spacing:6px}
+
+  /* ---------- кнопки-стикеры ---------- */
+  .btn{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--ink);background:var(--paper);
+    color:var(--ink);padding:.85em 1.3em;font-weight:800;font-size:.74rem;letter-spacing:.16em;
+    text-transform:uppercase;box-shadow:4px 4px 0 var(--ink);transition:.15s;text-decoration:none}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn-red{background:var(--red);color:var(--paper)}
+
+  /* ---------- QR-секция ---------- */
+  .hero{padding:54px 0 30px;text-align:center}
+  .hero h1{font-weight:900;font-size:clamp(1.9rem,6vw,3.2rem);text-transform:uppercase;
+    line-height:1.08;margin:34px auto 10px;max-width:20ch}
+  .hero h1 em{font-style:normal;color:var(--red)}
+  .sub{max-width:32rem;margin:0 auto;color:rgba(28,23,19,.75);font-size:1.05rem;font-weight:600}
+  .qr-card{width:min(340px,100%);margin:36px auto 0;background:var(--paper);border:2px solid var(--ink);
+    box-shadow:10px 10px 0 var(--red);padding:16px 16px 12px;transform:rotate(-1.5deg)}
+  .qr-frame svg{width:100%;height:auto;display:block}
+  .qr-empty{padding:2.4rem .6rem;font-style:italic;color:#6b5f4c}
+  .qr-caption{margin-top:10px;color:var(--red)}
+  .qr-url{margin-top:12px;font-size:.75rem;font-weight:600;color:rgba(28,23,19,.55);word-break:break-all}
+  .qr-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+  #urlInput{width:min(340px,100%);margin-top:22px;border:2px solid var(--ink);background:transparent;
+    padding:.8em 1em;font:600 1rem 'Playfair Display',serif}
+  #urlInput:focus{outline:none;box-shadow:4px 4px 0 var(--red)}
+  .preview-row{margin-top:30px}
+
+  /* ---------- дуга AMAZE ---------- */
+  .arc-sec{text-align:center;margin:80px 0 90px;position:relative}
+  .arc-sec svg{width:min(460px,90%);height:auto}
+  .kupit{font-weight:800;font-size:clamp(1.1rem,3.4vw,1.55rem);letter-spacing:.05em;
+    text-transform:uppercase;max-width:24ch;margin:6px auto 0}
+  .visit{display:inline-block;margin-top:14px;color:var(--red);font-weight:800;font-size:.8rem;
+    letter-spacing:.22em;text-transform:uppercase;text-decoration:underline;text-underline-offset:5px}
+
+  /* ---------- дудлы ---------- */
+  .dd{position:absolute;color:var(--red);pointer-events:none}
+  .dd svg{width:100%;height:auto;display:block}
+  @media(max-width:640px){.dd.hide-m{display:none}}
+
+  /* ---------- экран подтверждения ---------- */
+  #ok{display:none;text-align:center;padding:60px 0 90px}
+  body.ok #shop{display:none}
+  body.ok #ok{display:block}
+  #ok h1{font-weight:900;font-size:clamp(2.4rem,9vw,4.6rem);text-transform:uppercase;
+    line-height:1.02;margin:36px auto 14px}
+  #ok h1 em{font-style:normal;color:var(--red)}
+  .order-meta{color:var(--red)}
+  .order-meta b{font-weight:900}
+  #ok .note{max-width:30rem;margin:22px auto 0;font-size:1.08rem;font-weight:600;
+    color:rgba(28,23,19,.78);line-height:1.65}
+  .crack{width:190px;margin:38px auto 8px;display:block}
+  .bigcheck{width:min(190px,52vw);margin:26px auto 0;display:block;overflow:visible}
+  .back{margin-top:44px;display:inline-block}
+
+  /* ---------- футер ---------- */
+  .footer-red{background:var(--red);color:var(--paper);text-align:center;padding:74px 20px 44px}
+  .footer-red .f-h{font-weight:900;font-size:clamp(2.1rem,7.5vw,4rem);line-height:1.04;text-transform:uppercase}
+  .pyramid{width:132px;margin:38px auto 30px;transform:rotate(-8deg)}
+  .phone{font-weight:900;font-size:clamp(1.7rem,6vw,3rem);letter-spacing:.03em;text-decoration:none}
+  .disc{max-width:32rem;margin:50px auto 0;font-weight:700;font-size:1rem;line-height:1.6}
+  .copy{margin-top:20px;font-weight:700;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+
+  /* ---------- тост ---------- */
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);opacity:0;
+    background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--red);
+    padding:.7em 1.2em;font-weight:800;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;
+    transition:.25s;pointer-events:none;z-index:50}
+  #toast.on{opacity:1;transform:translateX(-50%)}
+
+  .rise{opacity:0;animation:rise .7s cubic-bezier(.22,1,.36,1) forwards}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}.d4{animation-delay:.38s}
+  @media (prefers-reduced-motion:reduce){.rise{animation:none;opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- ======= ШАПКА ======= -->
+<header class="topbar">
+  <div>
+    <p class="kicker">Home of the authentic</p>
+    <svg class="logo-arc" viewBox="0 0 420 150" aria-label="One Wish Willow">
+      <path id="arcLogo" d="M38 130 Q210 12 382 130" fill="none"/>
+      <text font-family="Chewy,cursive" font-size="47" fill="#FBF4E4" letter-spacing="1.5">
+        <textPath href="#arcLogo" startOffset="50%" text-anchor="middle">ONE WISH WILLOW</textPath>
+      </text>
+    </svg>
+  </div>
+  <span class="pill">Распродано</span>
+</header>
+
+<!-- ======= ЛЕНДИНГ + QR ======= -->
+<main id="shop">
+  <section class="hero wrap">
+    <span class="dd hide-m" style="left:4%;top:110px;width:26px;transform:rotate(-14deg)"><svg viewBox="0 0 20 20"><path d="M10 17C-6 7 4 -3 10 4C16 -3 26 7 10 17Z" fill="currentColor"/></svg></span>
+    <span class="dd hide-m" style="right:6%;top:70px;width:22px"><svg viewBox="0 0 20 20"><path d="M10 0C11.4 6 14 8.6 20 10C14 11.4 11.4 14 10 20C8.6 14 6 11.4 0 10C6 8.6 8.6 6 10 0Z" fill="currentColor"/></svg></span>
+    <span class="dd hide-m" style="left:9%;bottom:40px;width:24px"><svg viewBox="0 0 20 20"><path d="M10 10m-1 0a1 1 0 0 1 2 0a2.4 2.4 0 0 1-4.8 0a4 4 0 0 1 8 0a5.6 5.6 0 0 1-11.2 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+    <span class="dd hide-m" style="right:10%;bottom:100px;width:20px"><svg viewBox="0 0 20 20"><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+
+    <div class="rise d1" id="ribbonScan"></div>
+    <h1 class="rise d2">Наведите камеру — <em>заказ подтверждён!</em></h1>
+    <p class="sub rise d2">Этот код лежит в каждой посылке. Один взгляд — и покупатель видит подтверждение своего заказа. Без приложений.</p>
+
+    <div class="qr-card rise d3">
+      <div class="qr-frame" id="qrFrame"></div>
+      <p class="qr-caption caps">Сканируйте камеру</p>
+    </div>
+    <p class="qr-url rise d3" id="qrUrlLabel">—</p>
+
+    <div class="qr-actions rise d4">
+      <button class="btn btn-red" id="dlPng">Скачать QR (PNG)</button>
+      <button class="btn" id="copyLink">Скопировать ссылку</button>
+    </div>
+    <input id="urlInput" type="text" spellcheck="false" autocomplete="off"
+           placeholder="ваш-домен.ru" aria-label="Адрес страницы">
+    <p class="sub" style="font-size:.85rem;margin-top:10px">После публикации впишите свой адрес — код обновится сам.</p>
+
+    <div class="preview-row rise d4">
+      <button class="btn" id="openOk">Что увидит покупатель?</button>
+    </div>
+  </section>
+
+  <section class="arc-sec wrap">
+    <span class="dd hide-m" style="left:2%;top:-30px;width:24px;transform:rotate(18deg)"><svg viewBox="0 0 20 20"><path d="M10 17C-6 7 4 -3 10 4C16 -3 26 7 10 17Z" fill="currentColor"/></svg></span>
+    <span class="dd hide-m" style="left:12%;top:40px;width:16px"><svg viewBox="0 0 20 20"><path d="M10 0C11.4 6 14 8.6 20 10C14 11.4 11.4 14 10 20C8.6 14 6 11.4 0 10C6 8.6 8.6 6 10 0Z" fill="currentColor"/></svg></span>
+    <span class="dd hide-m" style="right:3%;top:-20px;width:26px"><svg viewBox="0 0 20 20"><path d="M10 17C-6 7 4 -3 10 4C16 -3 26 7 10 17Z" fill="currentColor"/></svg></span>
+    <span class="dd" style="right:14%;bottom:-10px;width:18px"><svg viewBox="0 0 20 20"><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+
+    <svg viewBox="0 0 420 118" aria-hidden="true">
+      <path id="arc2" d="M28 102 Q210 6 392 102" fill="none"/>
+      <text font-family="Chewy,cursive" font-size="31" fill="#D2382C" letter-spacing="2">
+        <textPath href="#arc2" startOffset="50%" text-anchor="middle">AMAZE YOUR FRIENDS</textPath>
+      </text>
+    </svg>
+    <p class="kupit">Купить соответствующий аксессуар</p>
+    <a class="visit" href="https://onewishwillow.com" target="_blank" rel="noopener">Посетить сайт</a>
+  </section>
+</main>
+
+<!-- ======= ЭКРАН «ЗАКАЗ ПОДТВЕРЖДЁН» (то, что открывается по QR) ======= -->
+<main id="ok" class="wrap">
+  <div id="ribbonOk"></div>
+
+  <h1 class="rise d1">Заказ <em>подтверждён!</em></h1>
+  <p class="order-meta caps rise d2"><b id="orderNum">№ WW-0000</b> · <span id="orderTime"></span></p>
+  <p class="note rise d3">Коробочка «One Wish Willow» уже летит к вам.
+    Письмо с трек-номером придёт на почту в течение часа. Осталось загадать желание!</p>
+
+  <!-- CRACK! -->
+  <svg class="crack rise d3" viewBox="0 0 220 120" aria-hidden="true">
+    <g stroke="#D2382C" stroke-width="4" stroke-linecap="round">
+      <path d="M60 44L42 26"/><path d="M110 26V4"/><path d="M160 44L178 26"/>
+      <path d="M38 78L14 74"/><path d="M182 78L206 74"/>
+    </g>
+    <text x="110" y="72" text-anchor="middle" font-family="Chewy,cursive" font-size="42" fill="#D2382C">CRACK!</text>
+    <path d="M96 96 L124 84 L112 100 L134 92" fill="none" stroke="#D2382C" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+
+  <!-- большая галочка -->
+  <svg class="bigcheck" viewBox="0 0 220 180" aria-hidden="true">
+    <path id="ckPath" d="M36 96 L88 148 L188 34" fill="none" stroke="#D2382C"
+          stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+
+  <button class="btn back" id="backShop">← Назад</button>
+</main>
+
+<!-- ======= КРАСНЫЙ ФУТЕР ======= -->
+<footer class="footer-red">
+  <h2 class="f-h">Нужна помощь?<br>Звоните прямо сейчас!</h2>
+  <svg class="pyramid" viewBox="0 0 170 120" aria-hidden="true">
+    <polygon points="85,8 160,108 10,108" fill="#FBF4E4"/>
+    <path d="M85 8 L74 108" stroke="#E2D4B8" stroke-width="2"/>
+    <text x="46" y="62" transform="rotate(-13 46 62)" font-family="Chewy,cursive" font-size="14" fill="#D2382C" text-anchor="middle">ONE WISH</text>
+    <text x="42" y="80" transform="rotate(-13 42 80)" font-family="Chewy,cursive" font-size="14" fill="#D2382C" text-anchor="middle">WILLOW</text>
+    <text x="112" y="78" transform="rotate(7 112 78)" font-family="Chewy,cursive" font-size="12" fill="#D2382C" text-anchor="middle">ONE WISH WILLOW</text>
+  </svg>
+  <a class="phone" href="tel:13237477118">1-323-747-7118</a>
+  <p class="disc">«One Wish Willow» — это на 100 % волшебство и на 0 % реальность.
+    Только для развлечения. Желания не исполняются.</p>
+  <p class="copy">Авторские права © 2026 Focus Features. Все права защищены</p>
+</footer>
+
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+
+/* ---------- лента-wave ---------- */
+let rid=0;
+function ribbon(label){
+  const id='rb'+(++rid);
+  return `<svg class="ribbon" viewBox="-26 -6 614 142" role="img" aria-label="${label}">
+    <polygon points="30,60 -16,50 2,76 -16,102 30,92" fill="#D2382C"/>
+    <polygon points="530,22 576,12 558,36 576,60 530,52" fill="#D2382C"/>
+    <path d="M30 60 C130 6 230 90 330 50 C408 18 470 32 530 22 L530 52 C470 62 408 48 330 80 C230 120 130 36 30 90 Z" fill="#D2382C"/>
+    <path id="${id}" d="M46 76 C140 24 236 106 332 66 C404 38 466 50 518 40" fill="none"/>
+    <text><textPath href="#${id}" startOffset="50%" text-anchor="middle">${label}</textPath></text>
+    <path d="M0,-9 C1.4,-3 2.8,-1.6 9,-0.2 C2.8,1.2 1.4,2.6 0,8.8 C-1.4,2.6 -2.8,1.2 -9,-0.2 C-2.8,-1.6 -1.4,-3 0,-9 Z" transform="translate(-4 16) scale(1.6)" fill="#D2382C"/>
+    <path d="M0,-9 C1.4,-3 2.8,-1.6 9,-0.2 C2.8,1.2 1.4,2.6 0,8.8 C-1.4,2.6 -2.8,1.2 -9,-0.2 C-2.8,-1.6 -1.4,-3 0,-9 Z" transform="translate(562 92) scale(1.9)" fill="#D2382C"/>
+  </svg>`;
+}
+ $('#ribbonScan').innerHTML=ribbon('SCAN ME');
+ $('#ribbonOk').innerHTML=ribbon("IT'S CONFIRMED!");
+
+/* ---------- тост ---------- */
+let tt;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200);}
+async function copyText(v){try{await navigator.clipboard.writeText(v);return true}
+  catch(e){const a=document.createElement('textarea');a.value=v;document.body.appendChild(a);
+  a.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}a.remove();return ok}}
+
+/* ---------- QR: код всегда ведёт на экран «Заказ подтверждён» ---------- */
+const input=$('#urlInput');
+if(/^https?:/.test(location.protocol))input.value=location.origin+location.pathname;
+function targetUrl(){
+  let v=input.value.trim();if(!v)return null;
+  if(!v.includes('://'))v='https://'+v;
+  try{const u=new URL(v);u.searchParams.set('order','confirmed');return u.toString()}
+  catch(e){return null}
+}
+function makeQr(url){const qr=qrcode(0,'M');qr.addData(url);qr.make();return qr}
+function renderQr(){
+  const url=targetUrl(),f=$('#qrFrame');
+  if(!url){f.innerHTML='<p class="qr-empty">Введите адрес — код появится здесь</p>';
+    $('#qrUrlLabel').textContent='—';return}
+  if(!window.qrcode){f.innerHTML='<p class="qr-empty">Генератор недоступен, обновите страницу</p>';return}
+  const qr=makeQr(url),n=qr.getModuleCount(),c=4,qz=c*4,s=n*c+qz*2;
+  let d='';for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(qr.isDark(r,k))d+=`M${qz+k*c} ${qz+r*c}h${c}v${c}h-${c}z`;
+  f.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${s} ${s}" shape-rendering="crispEdges" role="img" aria-label="QR-код"><rect width="${s}" height="${s}" fill="#FBF4E4"/><path d="${d}" fill="#1C1713"/></svg>`;
+  $('#qrUrlLabel').textContent=url;
+}
+let tm;input.addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(renderQr,250)});
+renderQr();
+
+ $('#dlPng').addEventListener('click',()=>{
+  const url=targetUrl();if(!url||!window.qrcode)return toast('Сначала укажите адрес');
+  const qr=makeQr(url),n=qr.getModuleCount(),c=Math.ceil(1200/(n+8)),qz=c*4,s=n*c+qz*2;
+  const cv=document.createElement('canvas');cv.width=cv.height=s;
+  const g=cv.getContext('2d');
+  g.fillStyle='#FBF4E4';g.fillRect(0,0,s,s);g.fillStyle='#1C1713';
+  for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(qr.isDark(r,k))g.fillRect(qz+k*c,qz+r*c,c,c);
+  const a=document.createElement('a');a.href=cv.toDataURL('image/png');
+  a.download='one-wish-willow-qr.png';a.click();toast('QR сохранён');
+});
+ $('#copyLink').addEventListener('click',async()=>{
+  const url=targetUrl();if(!url)return toast('Сначала укажите адрес');
+  toast((await copyText(url))?'Ссылка скопирована':'Не удалось скопировать');
+});
+
+/* ---------- экран подтверждения + галочка ---------- */
+function drawCheck(){
+  const p=$('#ckPath'),L=p.getTotalLength();
+  p.style.strokeDasharray=L;p.style.strokeDashoffset=L;
+  p.animate([{strokeDashoffset:L},{strokeDashoffset:0}],
+    {duration:600,delay:350,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+}
+function fillOrder(){
+  const n=new Date();
+  $('#orderNum').textContent='№ WW-'+Math.floor(1000+Math.random()*9000);
+  $('#orderTime').textContent='оформлен сегодня в '+n.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+}
+function showOk(){
+  document.body.classList.add('ok');fillOrder();scrollTo(0,0);
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced){const p=$('#ckPath');p.style.strokeDasharray='none';}
+  else drawCheck();
+}
+ $('#openOk').addEventListener('click',showOk);
+ $('#backShop').addEventListener('click',()=>{
+  document.body.classList.remove('ok');
+  const u=new URL(location.href);u.searchParams.delete('order');
+  history.replaceState(null,'',u.pathname+u.search);
+});
+
+/* старт: переход по QR (?order=confirmed) сразу открывает подтверждение */
+const q=new URLSearchParams(location.search);
+if(q.has('order')||/confirm/i.test(location.hash))showOk();
+})();
+</script>
+</body>
+</html>
